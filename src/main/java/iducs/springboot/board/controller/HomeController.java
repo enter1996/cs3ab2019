@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import iducs.springboot.board.domain.User;
 import iducs.springboot.board.service.UserService;
+import iducs.springboot.board.utils.HttpSessionUtils;
 
 @Controller
 public class HomeController {
@@ -22,13 +23,16 @@ public class HomeController {
 		for(int i = 1;i <= 10; i++)
 			userService.saveUser(new User("u" + i, "p" + i, "name" + i, "contact" + i));	
 		return "index";
-	}
+	}//db에 user객체 10개 만들기
 	@GetMapping("/")
 	public String home() {		
 		return "index";
 	}
 	@GetMapping("/questions/form") // 등록폼은 form URL을 가지도록 규칙화하겠음
 	public String questionForm(HttpSession session, Model model) {
+		if(HttpSessionUtils.isEmpty(session, "user")) {
+			return "redirect:/users/login-form"; //로그인 창으로 
+		}
 		User writer = (User) session.getAttribute("user");
 		model.addAttribute("writer", writer);
 		return "/questions/register";

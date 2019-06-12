@@ -25,6 +25,7 @@ import iducs.springboot.board.exception.ResourceNotFoundException;
 import iducs.springboot.board.repository.UserRepository;
 import iducs.springboot.board.service.QuestionService;
 import iducs.springboot.board.service.UserService;
+import iducs.springboot.board.utils.HttpSessionUtils;
 
 @Controller
 @RequestMapping("/questions")
@@ -49,8 +50,14 @@ public class QuerstionController {
 	}
 	
 	@GetMapping("/{id}")
-	public String getQuestionById(@PathVariable(value = "id") Long id, Model model) {
+	public String getQuestionById(@PathVariable(value = "id") Long id, Model model, HttpSession session) {
+		if(HttpSessionUtils.isEmpty(session, "user")) {
+			return "redirect:/users/login-form";
+		}
 		Question question = questionService.getQuestionById(id);
+		if(HttpSessionUtils.isSameUser((User)session.getAttribute("user"), question.getWriter())) { // 로그인 정보와 글쓴이가 같으면
+			model.addAttribute("same",question.getWriter()); // 글쓴이 정보를 가지는 값 생성 
+		}
 		model.addAttribute("question", question);
 		return "/questions/info";
 	}
